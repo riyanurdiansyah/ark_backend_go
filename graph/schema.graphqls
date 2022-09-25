@@ -1,0 +1,33 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+
+type PaymentMethodGQL {
+	ID:          Int!
+	Value:       Int!
+	Chanel:      String!
+	Code:        String!
+	Description: String!
+	Image:       String!
+	Limit:       Int!
+	Status:      Boolean!
+	Tipe:        Int!
+	Title:       String!
+	TitleType:   String!
+}
+
+type PaymentMethodResponse {
+	Code: Int!
+	Status: Boolean!,
+	Data: [PaymentMethodGQL!]
+}
+
+type Query {
+  paymentmethod : PaymentMethodResponse
+}
+
+input NewTodo {
+  text: String!
+  userId: String!
+}
