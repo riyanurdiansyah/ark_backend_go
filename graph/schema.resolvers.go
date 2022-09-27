@@ -116,7 +116,7 @@ func (r *subscriptionResolver) Coin(ctx context.Context, userid int) (<-chan *mo
 				}
 			} else {
 				select {
-				case ch <- &model.CoinGql{}:
+				case ch <- nil:
 					// Our message went through, do nothing
 				default:
 					fmt.Println("Channel closed.")
