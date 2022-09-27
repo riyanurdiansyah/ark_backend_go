@@ -5,6 +5,28 @@ import (
 	"ark_backend_go/models/entity"
 )
 
+func ToPaymentMethodResponseDTO(payment *entity.PaymentMethod) *model.PaymentMethodGql {
+	var status bool
+	if payment.Status == 1 {
+		status = true
+	} else {
+		status = false
+	}
+	return &model.PaymentMethodGql{
+		ID:          payment.ID,
+		Value:       payment.Value,
+		Chanel:      payment.Chanel,
+		Code:        payment.Code,
+		Description: payment.Description,
+		Image:       payment.Image,
+		Limit:       payment.Limit,
+		Status:      status,
+		Tipe:        payment.Tipe,
+		Title:       payment.Title,
+		TitleType:   payment.TitleType,
+	}
+}
+
 func ToListPaymentMethodResponseDTO(promo []*entity.PaymentMethod) []*PaymentMethodDTO {
 	var listTemp = []*PaymentMethodDTO{}
 	for _, data := range promo {

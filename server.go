@@ -5,19 +5,17 @@ import (
 	"ark_backend_go/database"
 	"ark_backend_go/graph"
 	"ark_backend_go/graph/generated"
-	"ark_backend_go/helper"
 	repository "ark_backend_go/repositories"
 	service "ark_backend_go/services"
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
-	"github.com/gorilla/websocket"
 )
 
 const defaultPort = "8080"
@@ -37,6 +35,7 @@ func graphqlHandler() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resol}))
+		srv.AddTransport(&transport.Websocket{})
 		srv.ServeHTTP(c.Writer, c.Request)
 	}
 }
@@ -56,44 +55,55 @@ func main() {
 		port = defaultPort
 	}
 
-	upgrader := websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
+	resol := graph.NewResolver(paymentService)
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resol}))
 
-	r := gin.Default()
-	r.Static("assets", "./assets")
-	r.POST("/query", graphqlHandler())
-	r.GET("/graphql", playgroundHandler())
+	srv.AddTransport(&transport.Websocket{})
 
-	v1 := r.Group("/api/v1")
-	{
-		auth := v1.Group("/payment")
-		{
-			auth.GET("/method", paymentController.GetPaymentMethod)
-		}
-	}
-
-	r.GET("/websoc", func(ctx *gin.Context) {
-		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-		if err != nil {
-			log.Print("upgrade:", err)
-		}
-
-		defer conn.Close()
-
-		for i := 0; i < 1000; i++ {
-			time.Sleep(time.Second * 5)
-			paymentResponse := paymentService.GetPaymentMethod()
-			conn.WriteJSON(helper.DefaultResponse{
-				Code:    http.StatusOK,
-				Message: "Payment method has been listed",
-				Data:    paymentResponse,
-				Status:  true})
-		}
-	})
+	http.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
+	http.Handle("/graphql", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	r.Run(":" + port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
+
+	// upgrader := websocket.Upgrader{
+	// 	CheckOrigin: func(r *http.Request) bool {
+	// 		return true
+	// 	},
+	// }
+
+	// r := gin.Default()
+	// r.Static("assets", "./assets")
+	// r.GET("/", playgroundHandler())
+	// r.POST("/query", graphqlHandler())
+
+	// v1 := r.Group("/api/v1")
+	// {
+	// 	auth := v1.Group("/payment")
+	// 	{
+	// 		auth.GET("/method", paymentController.GetPaymentMethod)
+	// 	}
+	// }
+
+	// r.GET("/websoc", func(ctx *gin.Context) {
+	// 	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+	// 	if err != nil {
+	// 		log.Print("upgrade:", err)
+	// 	}
+
+	// 	defer conn.Close()
+
+	// 	for i := 0; i < 1000; i++ {
+	// 		time.Sleep(time.Second * 5)
+	// 		paymentResponse := paymentService.GetPaymentMethod()
+	// 		conn.WriteJSON(helper.DefaultResponse{
+	// 			Code:    http.StatusOK,
+	// 			Message: "Payment method has been listed",
+	// 			Data:    paymentResponse,
+	// 			Status:  true})
+	// 	}
+	// })
+
+	// log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	// r.Run(":" + port)
 }

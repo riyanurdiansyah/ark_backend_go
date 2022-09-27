@@ -2,12 +2,7 @@
 
 package model
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
-}
-
-type PaymentMethodGql struct {
+type NewPaymentMethod struct {
 	ID          int    `json:"id"`
 	Value       int    `json:"value"`
 	Chanel      string `json:"chanel"`
@@ -18,11 +13,19 @@ type PaymentMethodGql struct {
 	Status      bool   `json:"status"`
 	Tipe        int    `json:"tipe"`
 	Title       string `json:"title"`
-	TitleType   string `json:"title_type"`
+	TitleType   string `json:"titleType"`
 }
 
-type PaymentMethodResponse struct {
-	Code   int                 `json:"code"`
-	Status bool                `json:"status"`
-	Data   []*PaymentMethodGql `json:"data"`
+type PaymentMethodGql struct {
+	ID          int    `json:"ID"`
+	Value       int    `json:"Value"`
+	Chanel      string `json:"Chanel"`
+	Code        string `json:"Code"`
+	Description string `json:"Description"`
+	Image       string `json:"Image"`
+	Limit       int    `json:"Limit"`
+	Status      bool   `json:"Status"`
+	Tipe        int    `json:"Tipe"`
+	Title       string `json:"Title"`
+	TitleType   string `json:"TitleType"`
 }

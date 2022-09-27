@@ -17,17 +17,30 @@ type PaymentMethodGQL {
 	TitleType:   String!
 }
 
-type PaymentMethodResponse {
-	Code: Int!
-	Status: Boolean!,
-	Data: [PaymentMethodGQL!]
-}
 
 type Query {
-  paymentmethod : PaymentMethodResponse
+  paymentmethod : [PaymentMethodGQL!]
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
+type Subscription {
+  method: [PaymentMethodGQL!]
+  paymentmethod: [PaymentMethodGQL]
+}
+
+input NewPaymentMethod {
+	id:          Int!
+	value:       Int!
+	chanel:      String!
+	code:        String!
+	description: String!
+	image:       String!
+	limit:       Int!
+	status:      Boolean!
+	tipe:        Int!
+	title:       String!
+	titleType:   String!
+}
+
+type Mutation {
+  addPaymentMethod(input: NewPaymentMethod!): PaymentMethodGQL!
 }

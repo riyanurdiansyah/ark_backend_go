@@ -6,4 +6,5 @@ import (
 
 type PaymentService interface {
 	GetPaymentMethod() []*model.PaymentMethodGql
+	AddPaymentMethod(request *model.PaymentMethodGql) model.PaymentMethodGql
 }

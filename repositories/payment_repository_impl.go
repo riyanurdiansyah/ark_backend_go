@@ -22,3 +22,13 @@ func (*PaymentRepositoryImpl) GetPaymentMethod(db *gorm.DB) []*entity.PaymentMet
 
 	return listPaymentMethod
 }
+
+// AddPaymentMethod implements PaymentRepository
+func (*PaymentRepositoryImpl) AddPaymentMethod(db *gorm.DB, payment *entity.PaymentMethod) *entity.PaymentMethod {
+	result := db.Table("payment_method").Select("*").Create(&payment)
+	if result.Error != nil {
+		///handle panic
+		panic(result.Error)
+	}
+	return payment
+}
