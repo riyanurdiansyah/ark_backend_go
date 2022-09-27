@@ -2,7 +2,7 @@
 
 package model
 
-type NewPaymentMethod struct {
+type InputNewPaymentGql struct {
 	ID          int    `json:"id"`
 	Value       int    `json:"value"`
 	Chanel      string `json:"chanel"`
@@ -14,6 +14,16 @@ type NewPaymentMethod struct {
 	Tipe        int    `json:"tipe"`
 	Title       string `json:"title"`
 	TitleType   string `json:"titleType"`
+}
+
+type InputRemoteConfigGql struct {
+	Baseurl               *string `json:"baseurl"`
+	BaseURLPrakerja       *string `json:"baseUrlPrakerja"`
+	ForceLogout           *int    `json:"forceLogout"`
+	IsChecking            *int    `json:"isChecking"`
+	IsMaintenance         *int    `json:"isMaintenance"`
+	IsMaintenancePrakerja *int    `json:"isMaintenancePrakerja"`
+	NewVersion            *int    `json:"newVersion"`
 }
 
 type PaymentMethodGql struct {
@@ -28,4 +38,14 @@ type PaymentMethodGql struct {
 	Tipe        int    `json:"Tipe"`
 	Title       string `json:"Title"`
 	TitleType   string `json:"TitleType"`
+}
+
+type RemoteConfigGql struct {
+	BaseURL              *string `json:"BaseUrl"`
+	BaseURLPrakerja      *string `json:"BaseUrlPrakerja"`
+	ForceLogout          *int    `json:"ForceLogout"`
+	IsChecking           *int    `json:"IsChecking"`
+	IsMantenance         *int    `json:"IsMantenance"`
+	IsMantenancePrakerja *int    `json:"IsMantenancePrakerja"`
+	NewVersion           *int    `json:"NewVersion"`
 }

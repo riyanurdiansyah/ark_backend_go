@@ -27,11 +27,14 @@ var (
 	paymentRepository = repository.NewPaymentRepository()
 	paymentService    = service.NewPaymentService(paymentRepository, db, validate)
 	paymentController = controller.NewPaymentController(paymentService)
+
+	remoteConfigRepository = repository.NewRemoteConfigRepository()
+	remoteConfigService    = service.NewRemoteConfigService(remoteConfigRepository, db, validate)
 )
 
 // Defining the Graphql handler
 func graphqlHandler() gin.HandlerFunc {
-	resol := graph.NewResolver(paymentService)
+	resol := graph.NewResolver(paymentService, remoteConfigService)
 
 	return func(c *gin.Context) {
 		srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resol}))
@@ -55,7 +58,7 @@ func main() {
 		port = defaultPort
 	}
 
-	resol := graph.NewResolver(paymentService)
+	resol := graph.NewResolver(paymentService, remoteConfigService)
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resol}))
 
 	srv.AddTransport(&transport.Websocket{})

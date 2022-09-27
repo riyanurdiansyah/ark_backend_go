@@ -9,11 +9,13 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	PaymentService service.PaymentService
+	PaymentService      service.PaymentService
+	RemoteCongifService service.RemoteConfigService
 }
 
-func NewResolver(paymentService service.PaymentService) Resolver {
+func NewResolver(paymentService service.PaymentService, remoteConfigService service.RemoteConfigService) Resolver {
 	return Resolver{
-		PaymentService: paymentService,
+		PaymentService:      paymentService,
+		RemoteCongifService: remoteConfigService,
 	}
 }

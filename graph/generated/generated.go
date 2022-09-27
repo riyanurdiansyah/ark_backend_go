@@ -46,7 +46,8 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		AddPaymentMethod func(childComplexity int, input model.NewPaymentMethod) int
+		AddPaymentMethod   func(childComplexity int, input model.InputNewPaymentGql) int
+		UpdateRemoteConfig func(childComplexity int, input *model.InputRemoteConfigGql) int
 	}
 
 	PaymentMethodGQL struct {
@@ -65,23 +66,36 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Paymentmethod func(childComplexity int) int
+		Remoteconfig  func(childComplexity int) int
+	}
+
+	RemoteConfigGQL struct {
+		BaseURL              func(childComplexity int) int
+		BaseURLPrakerja      func(childComplexity int) int
+		ForceLogout          func(childComplexity int) int
+		IsChecking           func(childComplexity int) int
+		IsMantenance         func(childComplexity int) int
+		IsMantenancePrakerja func(childComplexity int) int
+		NewVersion           func(childComplexity int) int
 	}
 
 	Subscription struct {
-		Method        func(childComplexity int) int
 		Paymentmethod func(childComplexity int) int
+		Remoteconfig  func(childComplexity int) int
 	}
 }
 
 type MutationResolver interface {
-	AddPaymentMethod(ctx context.Context, input model.NewPaymentMethod) (*model.PaymentMethodGql, error)
+	AddPaymentMethod(ctx context.Context, input model.InputNewPaymentGql) (*model.PaymentMethodGql, error)
+	UpdateRemoteConfig(ctx context.Context, input *model.InputRemoteConfigGql) (*model.RemoteConfigGql, error)
 }
 type QueryResolver interface {
 	Paymentmethod(ctx context.Context) ([]*model.PaymentMethodGql, error)
+	Remoteconfig(ctx context.Context) (*model.RemoteConfigGql, error)
 }
 type SubscriptionResolver interface {
-	Method(ctx context.Context) (<-chan []*model.PaymentMethodGql, error)
 	Paymentmethod(ctx context.Context) (<-chan []*model.PaymentMethodGql, error)
+	Remoteconfig(ctx context.Context) (<-chan *model.RemoteConfigGql, error)
 }
 
 type executableSchema struct {
@@ -109,7 +123,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddPaymentMethod(childComplexity, args["input"].(model.NewPaymentMethod)), true
+		return e.complexity.Mutation.AddPaymentMethod(childComplexity, args["input"].(model.InputNewPaymentGql)), true
+
+	case "Mutation.updateRemoteConfig":
+		if e.complexity.Mutation.UpdateRemoteConfig == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateRemoteConfig_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateRemoteConfig(childComplexity, args["input"].(*model.InputRemoteConfigGql)), true
 
 	case "PaymentMethodGQL.Chanel":
 		if e.complexity.PaymentMethodGQL.Chanel == nil {
@@ -195,12 +221,61 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Paymentmethod(childComplexity), true
 
-	case "Subscription.method":
-		if e.complexity.Subscription.Method == nil {
+	case "Query.remoteconfig":
+		if e.complexity.Query.Remoteconfig == nil {
 			break
 		}
 
-		return e.complexity.Subscription.Method(childComplexity), true
+		return e.complexity.Query.Remoteconfig(childComplexity), true
+
+	case "RemoteConfigGQL.BaseUrl":
+		if e.complexity.RemoteConfigGQL.BaseURL == nil {
+			break
+		}
+
+		return e.complexity.RemoteConfigGQL.BaseURL(childComplexity), true
+
+	case "RemoteConfigGQL.BaseUrlPrakerja":
+		if e.complexity.RemoteConfigGQL.BaseURLPrakerja == nil {
+			break
+		}
+
+		return e.complexity.RemoteConfigGQL.BaseURLPrakerja(childComplexity), true
+
+	case "RemoteConfigGQL.ForceLogout":
+		if e.complexity.RemoteConfigGQL.ForceLogout == nil {
+			break
+		}
+
+		return e.complexity.RemoteConfigGQL.ForceLogout(childComplexity), true
+
+	case "RemoteConfigGQL.IsChecking":
+		if e.complexity.RemoteConfigGQL.IsChecking == nil {
+			break
+		}
+
+		return e.complexity.RemoteConfigGQL.IsChecking(childComplexity), true
+
+	case "RemoteConfigGQL.IsMantenance":
+		if e.complexity.RemoteConfigGQL.IsMantenance == nil {
+			break
+		}
+
+		return e.complexity.RemoteConfigGQL.IsMantenance(childComplexity), true
+
+	case "RemoteConfigGQL.IsMantenancePrakerja":
+		if e.complexity.RemoteConfigGQL.IsMantenancePrakerja == nil {
+			break
+		}
+
+		return e.complexity.RemoteConfigGQL.IsMantenancePrakerja(childComplexity), true
+
+	case "RemoteConfigGQL.NewVersion":
+		if e.complexity.RemoteConfigGQL.NewVersion == nil {
+			break
+		}
+
+		return e.complexity.RemoteConfigGQL.NewVersion(childComplexity), true
 
 	case "Subscription.paymentmethod":
 		if e.complexity.Subscription.Paymentmethod == nil {
@@ -208,6 +283,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.Paymentmethod(childComplexity), true
+
+	case "Subscription.remoteconfig":
+		if e.complexity.Subscription.Remoteconfig == nil {
+			break
+		}
+
+		return e.complexity.Subscription.Remoteconfig(childComplexity), true
 
 	}
 	return 0, false
@@ -217,7 +299,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputNewPaymentMethod,
+		ec.unmarshalInputInputNewPaymentGQL,
+		ec.unmarshalInputInputRemoteConfigGQL,
 	)
 	first := true
 
@@ -314,17 +397,38 @@ type PaymentMethodGQL {
 	TitleType:   String!
 }
 
+type RemoteConfigGQL {
+	BaseUrl:      			String
+	BaseUrlPrakerja:      	String
+	ForceLogout:          	Int
+	IsChecking:     	  	Int
+	IsMantenance:       	Int
+	IsMantenancePrakerja:   Int
+	NewVersion:   			Int
+}
+
 
 type Query {
-  paymentmethod : [PaymentMethodGQL!]
+  paymentmethod : 	[PaymentMethodGQL]
+  remoteconfig: 	RemoteConfigGQL
 }
 
 type Subscription {
-  method: [PaymentMethodGQL!]
-  paymentmethod: [PaymentMethodGQL]
+  paymentmethod: 	[PaymentMethodGQL]
+  remoteconfig: 	RemoteConfigGQL
 }
 
-input NewPaymentMethod {
+input InputRemoteConfigGQL {
+	baseurl:      				String
+	baseUrlPrakerja:      		String
+	forceLogout:          		Int
+	isChecking:     	  		Int
+	isMaintenance:       		Int
+	isMaintenancePrakerja:   	Int
+	newVersion:   				Int
+}	
+
+input InputNewPaymentGQL {
 	id:          Int!
 	value:       Int!
 	chanel:      String!
@@ -339,7 +443,8 @@ input NewPaymentMethod {
 }
 
 type Mutation {
-  addPaymentMethod(input: NewPaymentMethod!): PaymentMethodGQL!
+  addPaymentMethod(input: InputNewPaymentGQL!): PaymentMethodGQL!
+  updateRemoteConfig(input: InputRemoteConfigGQL): RemoteConfigGQL
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -351,10 +456,25 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_addPaymentMethod_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.NewPaymentMethod
+	var arg0 model.InputNewPaymentGql
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNNewPaymentMethod2ark_backend_goᚋgraphᚋmodelᚐNewPaymentMethod(ctx, tmp)
+		arg0, err = ec.unmarshalNInputNewPaymentGQL2ark_backend_goᚋgraphᚋmodelᚐInputNewPaymentGql(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateRemoteConfig_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.InputRemoteConfigGql
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOInputRemoteConfigGQL2ᚖark_backend_goᚋgraphᚋmodelᚐInputRemoteConfigGql(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -430,7 +550,7 @@ func (ec *executionContext) _Mutation_addPaymentMethod(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddPaymentMethod(rctx, fc.Args["input"].(model.NewPaymentMethod))
+		return ec.resolvers.Mutation().AddPaymentMethod(rctx, fc.Args["input"].(model.InputNewPaymentGql))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -489,6 +609,74 @@ func (ec *executionContext) fieldContext_Mutation_addPaymentMethod(ctx context.C
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_addPaymentMethod_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateRemoteConfig(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateRemoteConfig(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateRemoteConfig(rctx, fc.Args["input"].(*model.InputRemoteConfigGql))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.RemoteConfigGql)
+	fc.Result = res
+	return ec.marshalORemoteConfigGQL2ᚖark_backend_goᚋgraphᚋmodelᚐRemoteConfigGql(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateRemoteConfig(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "BaseUrl":
+				return ec.fieldContext_RemoteConfigGQL_BaseUrl(ctx, field)
+			case "BaseUrlPrakerja":
+				return ec.fieldContext_RemoteConfigGQL_BaseUrlPrakerja(ctx, field)
+			case "ForceLogout":
+				return ec.fieldContext_RemoteConfigGQL_ForceLogout(ctx, field)
+			case "IsChecking":
+				return ec.fieldContext_RemoteConfigGQL_IsChecking(ctx, field)
+			case "IsMantenance":
+				return ec.fieldContext_RemoteConfigGQL_IsMantenance(ctx, field)
+			case "IsMantenancePrakerja":
+				return ec.fieldContext_RemoteConfigGQL_IsMantenancePrakerja(ctx, field)
+			case "NewVersion":
+				return ec.fieldContext_RemoteConfigGQL_NewVersion(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RemoteConfigGQL", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateRemoteConfig_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -1004,7 +1192,7 @@ func (ec *executionContext) _Query_paymentmethod(ctx context.Context, field grap
 	}
 	res := resTmp.([]*model.PaymentMethodGql)
 	fc.Result = res
-	return ec.marshalOPaymentMethodGQL2ᚕᚖark_backend_goᚋgraphᚋmodelᚐPaymentMethodGqlᚄ(ctx, field.Selections, res)
+	return ec.marshalOPaymentMethodGQL2ᚕᚖark_backend_goᚋgraphᚋmodelᚐPaymentMethodGql(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_paymentmethod(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1039,6 +1227,63 @@ func (ec *executionContext) fieldContext_Query_paymentmethod(ctx context.Context
 				return ec.fieldContext_PaymentMethodGQL_TitleType(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type PaymentMethodGQL", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_remoteconfig(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_remoteconfig(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Remoteconfig(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.RemoteConfigGql)
+	fc.Result = res
+	return ec.marshalORemoteConfigGQL2ᚖark_backend_goᚋgraphᚋmodelᚐRemoteConfigGql(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_remoteconfig(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "BaseUrl":
+				return ec.fieldContext_RemoteConfigGQL_BaseUrl(ctx, field)
+			case "BaseUrlPrakerja":
+				return ec.fieldContext_RemoteConfigGQL_BaseUrlPrakerja(ctx, field)
+			case "ForceLogout":
+				return ec.fieldContext_RemoteConfigGQL_ForceLogout(ctx, field)
+			case "IsChecking":
+				return ec.fieldContext_RemoteConfigGQL_IsChecking(ctx, field)
+			case "IsMantenance":
+				return ec.fieldContext_RemoteConfigGQL_IsMantenance(ctx, field)
+			case "IsMantenancePrakerja":
+				return ec.fieldContext_RemoteConfigGQL_IsMantenancePrakerja(ctx, field)
+			case "NewVersion":
+				return ec.fieldContext_RemoteConfigGQL_NewVersion(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RemoteConfigGQL", field.Name)
 		},
 	}
 	return fc, nil
@@ -1173,80 +1418,288 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Subscription_method(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
-	fc, err := ec.fieldContext_Subscription_method(ctx, field)
+func (ec *executionContext) _RemoteConfigGQL_BaseUrl(ctx context.Context, field graphql.CollectedField, obj *model.RemoteConfigGql) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RemoteConfigGQL_BaseUrl(ctx, field)
 	if err != nil {
-		return nil
+		return graphql.Null
 	}
 	ctx = graphql.WithFieldContext(ctx, fc)
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = nil
+			ret = graphql.Null
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Subscription().Method(rctx)
+		return obj.BaseURL, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return nil
+		return graphql.Null
 	}
 	if resTmp == nil {
-		return nil
+		return graphql.Null
 	}
-	return func(ctx context.Context) graphql.Marshaler {
-		select {
-		case res, ok := <-resTmp.(<-chan []*model.PaymentMethodGql):
-			if !ok {
-				return nil
-			}
-			return graphql.WriterFunc(func(w io.Writer) {
-				w.Write([]byte{'{'})
-				graphql.MarshalString(field.Alias).MarshalGQL(w)
-				w.Write([]byte{':'})
-				ec.marshalOPaymentMethodGQL2ᚕᚖark_backend_goᚋgraphᚋmodelᚐPaymentMethodGqlᚄ(ctx, field.Selections, res).MarshalGQL(w)
-				w.Write([]byte{'}'})
-			})
-		case <-ctx.Done():
-			return nil
-		}
-	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Subscription_method(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_RemoteConfigGQL_BaseUrl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Subscription",
+		Object:     "RemoteConfigGQL",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "ID":
-				return ec.fieldContext_PaymentMethodGQL_ID(ctx, field)
-			case "Value":
-				return ec.fieldContext_PaymentMethodGQL_Value(ctx, field)
-			case "Chanel":
-				return ec.fieldContext_PaymentMethodGQL_Chanel(ctx, field)
-			case "Code":
-				return ec.fieldContext_PaymentMethodGQL_Code(ctx, field)
-			case "Description":
-				return ec.fieldContext_PaymentMethodGQL_Description(ctx, field)
-			case "Image":
-				return ec.fieldContext_PaymentMethodGQL_Image(ctx, field)
-			case "Limit":
-				return ec.fieldContext_PaymentMethodGQL_Limit(ctx, field)
-			case "Status":
-				return ec.fieldContext_PaymentMethodGQL_Status(ctx, field)
-			case "Tipe":
-				return ec.fieldContext_PaymentMethodGQL_Tipe(ctx, field)
-			case "Title":
-				return ec.fieldContext_PaymentMethodGQL_Title(ctx, field)
-			case "TitleType":
-				return ec.fieldContext_PaymentMethodGQL_TitleType(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PaymentMethodGQL", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RemoteConfigGQL_BaseUrlPrakerja(ctx context.Context, field graphql.CollectedField, obj *model.RemoteConfigGql) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RemoteConfigGQL_BaseUrlPrakerja(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BaseURLPrakerja, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RemoteConfigGQL_BaseUrlPrakerja(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RemoteConfigGQL",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RemoteConfigGQL_ForceLogout(ctx context.Context, field graphql.CollectedField, obj *model.RemoteConfigGql) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RemoteConfigGQL_ForceLogout(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ForceLogout, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RemoteConfigGQL_ForceLogout(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RemoteConfigGQL",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RemoteConfigGQL_IsChecking(ctx context.Context, field graphql.CollectedField, obj *model.RemoteConfigGql) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RemoteConfigGQL_IsChecking(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsChecking, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RemoteConfigGQL_IsChecking(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RemoteConfigGQL",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RemoteConfigGQL_IsMantenance(ctx context.Context, field graphql.CollectedField, obj *model.RemoteConfigGql) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RemoteConfigGQL_IsMantenance(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsMantenance, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RemoteConfigGQL_IsMantenance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RemoteConfigGQL",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RemoteConfigGQL_IsMantenancePrakerja(ctx context.Context, field graphql.CollectedField, obj *model.RemoteConfigGql) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RemoteConfigGQL_IsMantenancePrakerja(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsMantenancePrakerja, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RemoteConfigGQL_IsMantenancePrakerja(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RemoteConfigGQL",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RemoteConfigGQL_NewVersion(ctx context.Context, field graphql.CollectedField, obj *model.RemoteConfigGql) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RemoteConfigGQL_NewVersion(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewVersion, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RemoteConfigGQL_NewVersion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RemoteConfigGQL",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1326,6 +1779,77 @@ func (ec *executionContext) fieldContext_Subscription_paymentmethod(ctx context.
 				return ec.fieldContext_PaymentMethodGQL_TitleType(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type PaymentMethodGQL", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_remoteconfig(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	fc, err := ec.fieldContext_Subscription_remoteconfig(ctx, field)
+	if err != nil {
+		return nil
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().Remoteconfig(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		return nil
+	}
+	return func(ctx context.Context) graphql.Marshaler {
+		select {
+		case res, ok := <-resTmp.(<-chan *model.RemoteConfigGql):
+			if !ok {
+				return nil
+			}
+			return graphql.WriterFunc(func(w io.Writer) {
+				w.Write([]byte{'{'})
+				graphql.MarshalString(field.Alias).MarshalGQL(w)
+				w.Write([]byte{':'})
+				ec.marshalORemoteConfigGQL2ᚖark_backend_goᚋgraphᚋmodelᚐRemoteConfigGql(ctx, field.Selections, res).MarshalGQL(w)
+				w.Write([]byte{'}'})
+			})
+		case <-ctx.Done():
+			return nil
+		}
+	}
+}
+
+func (ec *executionContext) fieldContext_Subscription_remoteconfig(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "BaseUrl":
+				return ec.fieldContext_RemoteConfigGQL_BaseUrl(ctx, field)
+			case "BaseUrlPrakerja":
+				return ec.fieldContext_RemoteConfigGQL_BaseUrlPrakerja(ctx, field)
+			case "ForceLogout":
+				return ec.fieldContext_RemoteConfigGQL_ForceLogout(ctx, field)
+			case "IsChecking":
+				return ec.fieldContext_RemoteConfigGQL_IsChecking(ctx, field)
+			case "IsMantenance":
+				return ec.fieldContext_RemoteConfigGQL_IsMantenance(ctx, field)
+			case "IsMantenancePrakerja":
+				return ec.fieldContext_RemoteConfigGQL_IsMantenancePrakerja(ctx, field)
+			case "NewVersion":
+				return ec.fieldContext_RemoteConfigGQL_NewVersion(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RemoteConfigGQL", field.Name)
 		},
 	}
 	return fc, nil
@@ -3104,8 +3628,8 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputNewPaymentMethod(ctx context.Context, obj interface{}) (model.NewPaymentMethod, error) {
-	var it model.NewPaymentMethod
+func (ec *executionContext) unmarshalInputInputNewPaymentGQL(ctx context.Context, obj interface{}) (model.InputNewPaymentGql, error) {
+	var it model.InputNewPaymentGql
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -3212,6 +3736,82 @@ func (ec *executionContext) unmarshalInputNewPaymentMethod(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputInputRemoteConfigGQL(ctx context.Context, obj interface{}) (model.InputRemoteConfigGql, error) {
+	var it model.InputRemoteConfigGql
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"baseurl", "baseUrlPrakerja", "forceLogout", "isChecking", "isMaintenance", "isMaintenancePrakerja", "newVersion"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "baseurl":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("baseurl"))
+			it.Baseurl, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "baseUrlPrakerja":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("baseUrlPrakerja"))
+			it.BaseURLPrakerja, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "forceLogout":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("forceLogout"))
+			it.ForceLogout, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "isChecking":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isChecking"))
+			it.IsChecking, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "isMaintenance":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isMaintenance"))
+			it.IsMaintenance, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "isMaintenancePrakerja":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isMaintenancePrakerja"))
+			it.IsMaintenancePrakerja, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "newVersion":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newVersion"))
+			it.NewVersion, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -3248,6 +3848,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "updateRemoteConfig":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateRemoteConfig(ctx, field)
+			})
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3396,6 +4002,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
+		case "remoteconfig":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_remoteconfig(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
 		case "__type":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -3407,6 +4033,55 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var remoteConfigGQLImplementors = []string{"RemoteConfigGQL"}
+
+func (ec *executionContext) _RemoteConfigGQL(ctx context.Context, sel ast.SelectionSet, obj *model.RemoteConfigGql) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, remoteConfigGQLImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RemoteConfigGQL")
+		case "BaseUrl":
+
+			out.Values[i] = ec._RemoteConfigGQL_BaseUrl(ctx, field, obj)
+
+		case "BaseUrlPrakerja":
+
+			out.Values[i] = ec._RemoteConfigGQL_BaseUrlPrakerja(ctx, field, obj)
+
+		case "ForceLogout":
+
+			out.Values[i] = ec._RemoteConfigGQL_ForceLogout(ctx, field, obj)
+
+		case "IsChecking":
+
+			out.Values[i] = ec._RemoteConfigGQL_IsChecking(ctx, field, obj)
+
+		case "IsMantenance":
+
+			out.Values[i] = ec._RemoteConfigGQL_IsMantenance(ctx, field, obj)
+
+		case "IsMantenancePrakerja":
+
+			out.Values[i] = ec._RemoteConfigGQL_IsMantenancePrakerja(ctx, field, obj)
+
+		case "NewVersion":
+
+			out.Values[i] = ec._RemoteConfigGQL_NewVersion(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -3432,10 +4107,10 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 	}
 
 	switch fields[0].Name {
-	case "method":
-		return ec._Subscription_method(ctx, fields[0])
 	case "paymentmethod":
 		return ec._Subscription_paymentmethod(ctx, fields[0])
+	case "remoteconfig":
+		return ec._Subscription_remoteconfig(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -3774,6 +4449,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNInputNewPaymentGQL2ark_backend_goᚋgraphᚋmodelᚐInputNewPaymentGql(ctx context.Context, v interface{}) (model.InputNewPaymentGql, error) {
+	res, err := ec.unmarshalInputInputNewPaymentGQL(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3787,11 +4467,6 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNNewPaymentMethod2ark_backend_goᚋgraphᚋmodelᚐNewPaymentMethod(ctx context.Context, v interface{}) (model.NewPaymentMethod, error) {
-	res, err := ec.unmarshalInputNewPaymentMethod(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNPaymentMethodGQL2ark_backend_goᚋgraphᚋmodelᚐPaymentMethodGql(ctx context.Context, sel ast.SelectionSet, v model.PaymentMethodGql) graphql.Marshaler {
@@ -4102,6 +4777,30 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
+func (ec *executionContext) unmarshalOInputRemoteConfigGQL2ᚖark_backend_goᚋgraphᚋmodelᚐInputRemoteConfigGql(ctx context.Context, v interface{}) (*model.InputRemoteConfigGql, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputInputRemoteConfigGQL(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalInt(*v)
+	return res
+}
+
 func (ec *executionContext) marshalOPaymentMethodGQL2ᚕᚖark_backend_goᚋgraphᚋmodelᚐPaymentMethodGql(ctx context.Context, sel ast.SelectionSet, v []*model.PaymentMethodGql) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -4143,58 +4842,18 @@ func (ec *executionContext) marshalOPaymentMethodGQL2ᚕᚖark_backend_goᚋgrap
 	return ret
 }
 
-func (ec *executionContext) marshalOPaymentMethodGQL2ᚕᚖark_backend_goᚋgraphᚋmodelᚐPaymentMethodGqlᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.PaymentMethodGql) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNPaymentMethodGQL2ᚖark_backend_goᚋgraphᚋmodelᚐPaymentMethodGql(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
 func (ec *executionContext) marshalOPaymentMethodGQL2ᚖark_backend_goᚋgraphᚋmodelᚐPaymentMethodGql(ctx context.Context, sel ast.SelectionSet, v *model.PaymentMethodGql) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._PaymentMethodGQL(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalORemoteConfigGQL2ᚖark_backend_goᚋgraphᚋmodelᚐRemoteConfigGql(ctx context.Context, sel ast.SelectionSet, v *model.RemoteConfigGql) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._RemoteConfigGQL(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

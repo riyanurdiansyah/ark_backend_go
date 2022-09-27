@@ -17,17 +17,38 @@ type PaymentMethodGQL {
 	TitleType:   String!
 }
 
+type RemoteConfigGQL {
+	BaseUrl:      			String
+	BaseUrlPrakerja:      	String
+	ForceLogout:          	Int
+	IsChecking:     	  	Int
+	IsMantenance:       	Int
+	IsMantenancePrakerja:   Int
+	NewVersion:   			Int
+}
+
 
 type Query {
-  paymentmethod : [PaymentMethodGQL!]
+  paymentmethod : 	[PaymentMethodGQL]
+  remoteconfig: 	RemoteConfigGQL
 }
 
 type Subscription {
-  method: [PaymentMethodGQL!]
-  paymentmethod: [PaymentMethodGQL]
+  paymentmethod: 	[PaymentMethodGQL]
+  remoteconfig: 	RemoteConfigGQL
 }
 
-input NewPaymentMethod {
+input InputRemoteConfigGQL {
+	baseurl:      				String
+	baseUrlPrakerja:      		String
+	forceLogout:          		Int
+	isChecking:     	  		Int
+	isMaintenance:       		Int
+	isMaintenancePrakerja:   	Int
+	newVersion:   				Int
+}	
+
+input InputNewPaymentGQL {
 	id:          Int!
 	value:       Int!
 	chanel:      String!
@@ -42,5 +63,6 @@ input NewPaymentMethod {
 }
 
 type Mutation {
-  addPaymentMethod(input: NewPaymentMethod!): PaymentMethodGQL!
+  addPaymentMethod(input: InputNewPaymentGQL!): PaymentMethodGQL!
+  updateRemoteConfig(input: InputRemoteConfigGQL): RemoteConfigGQL
 }
