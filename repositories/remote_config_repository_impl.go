@@ -27,3 +27,11 @@ func (*RemoteConfigRepositoryImpl) GetRemoteConfig(db *gorm.DB) *entity.RemoteCo
 
 	return remoteConfig[0]
 }
+
+// UpdateRemoConfig implements RemoteConfigRepository
+func (*RemoteConfigRepositoryImpl) UpdateRemoConfig(db *gorm.DB, remote *entity.RemoteConfig) *entity.RemoteConfig {
+	result :=
+		db.Table("remote_config").Select("*").Updates(&remote)
+	helper.PanicIfError(result.Error)
+	return remote
+}

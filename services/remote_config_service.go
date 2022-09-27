@@ -6,5 +6,5 @@ import (
 
 type RemoteConfigService interface {
 	GetRemoteConfig() *model.RemoteConfigGql
-	UpdateRemoteConfig(request *model.RemoteConfigGql) model.RemoteConfigGql
+	UpdateRemoteConfig(request *model.InputRemoteConfigGql) model.RemoteConfigGql
 }

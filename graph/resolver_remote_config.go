@@ -11,18 +11,13 @@ import (
 	"time"
 )
 
-// UpdateRemoteConfig is the resolver for the updateRemoteConfig field.
-func (r *mutationResolver) UpdateRemoteConfig(ctx context.Context, input *model.InputRemoteConfigGql) (*model.RemoteConfigGql, error) {
-	panic(fmt.Errorf("not implemented: UpdateRemoteConfig - updateRemoteConfig"))
-}
-
 // Remoteconfig is the resolver for the remoteconfig field.
 func (r *subscriptionResolver) Remoteconfig(ctx context.Context) (<-chan *model.RemoteConfigGql, error) {
 	ch := make(chan *model.RemoteConfigGql)
 	go func() {
 		for {
 			time.Sleep(time.Second * 1)
-			data := r.RemoteCongifService.GetRemoteConfig()
+			data := r.RemoteConfigService.GetRemoteConfig()
 			println("PING")
 			select {
 			case ch <- data:
@@ -36,6 +31,11 @@ func (r *subscriptionResolver) Remoteconfig(ctx context.Context) (<-chan *model.
 	}()
 
 	return ch, nil
+}
+
+// Remoteconfig is the resolver for the remoteconfig field.
+func (r *queryResolver) Remoteconfig(ctx context.Context) (*model.RemoteConfigGql, error) {
+	panic(fmt.Errorf("not implemented: Remoteconfig - remoteconfig"))
 }
 
 // Mutation returns generated.MutationResolver implementation.

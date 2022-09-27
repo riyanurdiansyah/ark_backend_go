@@ -10,12 +10,14 @@ import (
 
 type Resolver struct {
 	PaymentService      service.PaymentService
-	RemoteCongifService service.RemoteConfigService
+	RemoteConfigService service.RemoteConfigService
+	CoinService         service.CoinService
 }
 
-func NewResolver(paymentService service.PaymentService, remoteConfigService service.RemoteConfigService) Resolver {
+func NewResolver(paymentService service.PaymentService, remoteConfigService service.RemoteConfigService, coinService service.CoinService) Resolver {
 	return Resolver{
 		PaymentService:      paymentService,
-		RemoteCongifService: remoteConfigService,
+		RemoteConfigService: remoteConfigService,
+		CoinService:         coinService,
 	}
 }

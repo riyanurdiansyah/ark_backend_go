@@ -2,6 +2,22 @@
 
 package model
 
+type CoinGql struct {
+	UserID      int    `json:"user_id"`
+	IsOldUser   bool   `json:"is_old_user"`
+	IsCompleted bool   `json:"is_completed"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+	Coins       int    `json:"coins"`
+}
+
+type InputCoinGql struct {
+	UserID      *int  `json:"user_id"`
+	IsOldUser   *bool `json:"is_old_user"`
+	IsCompleted *bool `json:"is_completed"`
+	Coins       *int  `json:"coins"`
+}
+
 type InputNewPaymentGql struct {
 	ID          int    `json:"id"`
 	Value       int    `json:"value"`
@@ -13,39 +29,41 @@ type InputNewPaymentGql struct {
 	Status      bool   `json:"status"`
 	Tipe        int    `json:"tipe"`
 	Title       string `json:"title"`
-	TitleType   string `json:"titleType"`
+	TitleType   string `json:"title_type"`
 }
 
 type InputRemoteConfigGql struct {
-	Baseurl               *string `json:"baseurl"`
-	BaseURLPrakerja       *string `json:"baseUrlPrakerja"`
-	ForceLogout           *int    `json:"forceLogout"`
-	IsChecking            *int    `json:"isChecking"`
-	IsMaintenance         *int    `json:"isMaintenance"`
-	IsMaintenancePrakerja *int    `json:"isMaintenancePrakerja"`
-	NewVersion            *int    `json:"newVersion"`
+	BaseURL               string `json:"base_url"`
+	BaseURLPrakerja       string `json:"base_url_prakerja"`
+	ForceLogout           bool   `json:"force_logout"`
+	IsChecking            bool   `json:"is_checking"`
+	IsImportant           bool   `json:"is_important"`
+	IsMaintenance         bool   `json:"is_maintenance"`
+	IsMaintenancePrakerja bool   `json:"is_maintenance_prakerja"`
+	NewVersion            int    `json:"new_version"`
 }
 
 type PaymentMethodGql struct {
-	ID          int    `json:"ID"`
-	Value       int    `json:"Value"`
-	Chanel      string `json:"Chanel"`
-	Code        string `json:"Code"`
-	Description string `json:"Description"`
-	Image       string `json:"Image"`
-	Limit       int    `json:"Limit"`
-	Status      bool   `json:"Status"`
-	Tipe        int    `json:"Tipe"`
-	Title       string `json:"Title"`
-	TitleType   string `json:"TitleType"`
+	ID          int    `json:"id"`
+	Value       int    `json:"value"`
+	Chanel      string `json:"chanel"`
+	Code        string `json:"code"`
+	Description string `json:"description"`
+	Image       string `json:"image"`
+	Limit       int    `json:"limit"`
+	Status      bool   `json:"status"`
+	Tipe        int    `json:"tipe"`
+	Title       string `json:"title"`
+	TitleType   string `json:"title_type"`
 }
 
 type RemoteConfigGql struct {
-	BaseURL              *string `json:"BaseUrl"`
-	BaseURLPrakerja      *string `json:"BaseUrlPrakerja"`
-	ForceLogout          *int    `json:"ForceLogout"`
-	IsChecking           *int    `json:"IsChecking"`
-	IsMantenance         *int    `json:"IsMantenance"`
-	IsMantenancePrakerja *int    `json:"IsMantenancePrakerja"`
-	NewVersion           *int    `json:"NewVersion"`
+	BaseURL              *string `json:"base_url"`
+	BaseURLPrakerja      *string `json:"base_url_prakerja"`
+	ForceLogout          *bool   `json:"force_logout"`
+	IsChecking           *bool   `json:"is_checking"`
+	IsImportant          *bool   `json:"is_important"`
+	IsMantenance         *bool   `json:"is_mantenance"`
+	IsMantenancePrakerja *bool   `json:"is_mantenance_prakerja"`
+	NewVersion           *int    `json:"new_version"`
 }

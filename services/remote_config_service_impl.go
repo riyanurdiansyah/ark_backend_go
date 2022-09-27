@@ -38,6 +38,14 @@ func (service *RemoteConfigServiceImpl) GetRemoteConfig() *model.RemoteConfigGql
 }
 
 // UpdateRemoteConfig implements RemoteConfigService
-func (*RemoteConfigServiceImpl) UpdateRemoteConfig(request *model.RemoteConfigGql) model.RemoteConfigGql {
-	panic("unimplemented")
+func (service *RemoteConfigServiceImpl) UpdateRemoteConfig(request *model.InputRemoteConfigGql) model.RemoteConfigGql {
+	tx := service.DB.Begin()
+	defer helper.CommitOrRollback(tx)
+	if tx.Error != nil {
+		return model.RemoteConfigGql{}
+	} else {
+		remote := dto.ToRemoteConfigEntity(request)
+		response := service.RemoteConfigRepository.UpdateRemoConfig(tx, remote)
+		return *dto.ToRemoteConfigResponseDTO(response)
+	}
 }

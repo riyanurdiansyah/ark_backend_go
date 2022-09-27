@@ -11,27 +11,6 @@ import (
 	"time"
 )
 
-// AddPaymentMethod is the resolver for the addPaymentMethod field.
-func (r *mutationResolver) AddPaymentMethod(ctx context.Context, input model.InputNewPaymentGql) (*model.PaymentMethodGql, error) {
-	method := &model.PaymentMethodGql{
-		ID:          input.ID,
-		Value:       input.Value,
-		Chanel:      input.Chanel,
-		Code:        input.Chanel,
-		Description: input.Description,
-		Image:       input.Image,
-		Limit:       input.Limit,
-		Status:      input.Status,
-		Tipe:        input.Tipe,
-		Title:       input.Title,
-		TitleType:   input.TitleType,
-	}
-
-	r.PaymentService.AddPaymentMethod(method)
-
-	return method, nil
-}
-
 // Paymentmethod is the resolver for the paymentmethod field.
 func (r *subscriptionResolver) Paymentmethod(ctx context.Context) (<-chan []*model.PaymentMethodGql, error) {
 	ch := make(chan []*model.PaymentMethodGql)

@@ -4,48 +4,58 @@
 
 
 type PaymentMethodGQL {
-	ID:          Int!
-	Value:       Int!
-	Chanel:      String!
-	Code:        String!
-	Description: String!
-	Image:       String!
-	Limit:       Int!
-	Status:      Boolean!
-	Tipe:        Int!
-	Title:       String!
-	TitleType:   String!
+	id:          Int!
+	value:       Int!
+	chanel:      String!
+	code:        String!
+	description: String!
+	image:       String!
+	limit:       Int!
+	status:      Boolean!
+	tipe:        Int!
+	title:       String!
+	title_type:   String!
 }
 
 type RemoteConfigGQL {
-	BaseUrl:      			String
-	BaseUrlPrakerja:      	String
-	ForceLogout:          	Int
-	IsChecking:     	  	Int
-	IsMantenance:       	Int
-	IsMantenancePrakerja:   Int
-	NewVersion:   			Int
+	base_url:      			String
+	base_url_prakerja:      String
+	force_logout:          	Boolean
+	is_checking:     	  	Boolean
+	is_important:     	  	Boolean
+	is_mantenance:       	Boolean
+	is_mantenance_prakerja: Boolean
+	new_version:   			Int
+}
+
+type CoinGQL {
+	user_id: Int!
+	is_old_user: Boolean!
+	is_completed: Boolean!
+	created_at: String!
+	updated_at: String!
+	coins: Int!
 }
 
 
-type Query {
-  paymentmethod : 	[PaymentMethodGQL]
-  remoteconfig: 	RemoteConfigGQL
+input InputCoinGQL {
+	user_id: Int
+	is_old_user: Boolean
+	is_completed: Boolean
+	coins: Int
 }
 
-type Subscription {
-  paymentmethod: 	[PaymentMethodGQL]
-  remoteconfig: 	RemoteConfigGQL
-}
+
 
 input InputRemoteConfigGQL {
-	baseurl:      				String
-	baseUrlPrakerja:      		String
-	forceLogout:          		Int
-	isChecking:     	  		Int
-	isMaintenance:       		Int
-	isMaintenancePrakerja:   	Int
-	newVersion:   				Int
+	base_url:      				String!
+	base_url_prakerja:      	String!
+	force_logout:          		Boolean!
+	is_checking:     	  		Boolean!
+	is_important:       		Boolean!
+	is_maintenance:       		Boolean!
+	is_maintenance_prakerja:   	Boolean!
+	new_version:   				Int!
 }	
 
 input InputNewPaymentGQL {
@@ -59,10 +69,23 @@ input InputNewPaymentGQL {
 	status:      Boolean!
 	tipe:        Int!
 	title:       String!
-	titleType:   String!
+	title_type:  String!
+}
+
+
+type Query {
+  payment_method: 	[PaymentMethodGQL]
+  remote_config: 	RemoteConfigGQL
+}
+
+type Subscription {
+  payment_method: 	[PaymentMethodGQL]
+  remote_config: 	RemoteConfigGQL
+  coin(userid: Int!): CoinGQL 
 }
 
 type Mutation {
-  addPaymentMethod(input: InputNewPaymentGQL!): PaymentMethodGQL!
-  updateRemoteConfig(input: InputRemoteConfigGQL): RemoteConfigGQL
+  add_payment_method(input: InputNewPaymentGQL!): PaymentMethodGQL!
+  update_remote_config(input: InputRemoteConfigGQL!): RemoteConfigGQL
+  update_coin(input: InputCoinGQL) : CoinGQL
 }

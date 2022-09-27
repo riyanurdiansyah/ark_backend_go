@@ -9,4 +9,5 @@ import (
 type RemoteConfigRepository interface {
 	GetRemoteConfig(db *gorm.DB) *entity.RemoteConfig
 	AddPaymentMethod(db *gorm.DB, remote *entity.RemoteConfig) *entity.RemoteConfig
+	UpdateRemoConfig(db *gorm.DB, remote *entity.RemoteConfig) *entity.RemoteConfig
 }
